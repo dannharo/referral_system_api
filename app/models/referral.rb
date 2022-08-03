@@ -22,4 +22,5 @@ class Referral < ApplicationRecord
             presence: true,
             length: { minimum: 4, maximum: 254 }
   validates :phone_number, uniqueness: { message: 'The phone number is already taken' }
+  # validates :active, presence: true
 end

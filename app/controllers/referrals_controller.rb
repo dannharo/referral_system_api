@@ -1,11 +1,27 @@
 class ReferralsController < ApplicationController
 
   def index
-    render json: Referral.all, except: [:created_at, :updated_at]
+    render json: Referral.where(active: true), except: [:active, :created_at, :updated_at]
   end
 
   def create
-
+    begin
+      referral = Referral.new(referral_params)
+      if referral.save
+        render json: referral, except: [:created_at, :updated_at], status: :created
+      else
+        render json: {
+          'message': 'Error while creating a new referral',
+          'errors': referral.errors
+        }, status: :unprocessable_entity
+      end
+    rescue StandardError => e
+      Rails.logger.error("Error while creating a new referral: #{e.message}")
+      render json: {
+        'message': 'Error while creating a new record',
+        'errors': [e.message]
+      }, status: :internal_server_error
+    end
   end
 
   def show
