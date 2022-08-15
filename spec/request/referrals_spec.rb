@@ -1,21 +1,22 @@
 require 'rails_helper'
 
 RSpec.describe ' Referrals API', type: :request do
-  let(:admin) { FactoryBot.create(:role, name: 'admin') }
-  let(:role_user) { FactoryBot.create(:role, name: 'user') }
-  let(:role_ta) { FactoryBot.create(:role, name: 'ta') }
+  let(:admin_role) { FactoryBot.create(:role, :role_admin) }
+  let(:user_role) { FactoryBot.create(:role, :role_user) }
+  let(:ta_role) { FactoryBot.create(:role, :role_ta) }
+  let(:ta_user) { FactoryBot.create(:user, role_id: ta_role) }
+  let(:regular_user) { FactoryBot.create(:user, role_id: user_role) }
 
   describe '#Index' do
+
     before do
-      ta_user = FactoryBot.create(:user, role_id: role_ta.id)
-      regular_user = FactoryBot.create(:user, role_id: role_user.id)
       FactoryBot.create(:referral,
         referred_by: regular_user.id,
-        linkedin_url: 'https://linkedin.com/example.1',
         tech_stack: 'ruby, RoR',
         ta_recruiter: ta_user,
         signed_date: Time.now
       )
+
       FactoryBot.create(:referral,
         referred_by: ta_user.id,
         linkedin_url: 'https://linkedin.com/example.2',
@@ -23,6 +24,7 @@ RSpec.describe ' Referrals API', type: :request do
         ta_recruiter: ta_user,
         signed_date: Time.now
       )
+
       FactoryBot.create(:referral,
         referred_by: ta_user.id,
         linkedin_url: 'https://linkedin.com/example.3',
@@ -32,12 +34,33 @@ RSpec.describe ' Referrals API', type: :request do
         active: false
       )
     end
-    context 'When call referral index enpoint' do
+    context 'When call referral index endpoint' do
       it 'returns all the active referrals' do
         get '/referrals'
 
         expect(response).to have_http_status(:success)
         expect(JSON.parse(response.body).size).to eq(2)
+      end
+    end
+  end
+  describe '#create' do
+    context 'When call referral create endpoint with valid data' do
+      let(:data_referral) do
+        {
+          full_name: 'Daniel Haro',
+          referred_by: regular_user.id,
+          linkedin_url: 'https://linkedin.com/example.5',
+          tech_stack: 'ruby, RoR, ',
+          ta_recruiter: ta_user.id,
+          email: 'example@example.com'
+        }
+      end
+
+      it 'create a new referral' do
+        binding.pry
+        post '/referrals', params: data_referral
+
+        expect(response).to have_http_status(:created)
       end
     end
   end

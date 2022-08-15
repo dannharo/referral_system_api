@@ -7,6 +7,7 @@ class ReferralsController < ApplicationController
   def create
     begin
       referral = Referral.new(referral_params)
+      binding.pry
       if referral.save
         render json: referral, except: [:created_at, :updated_at], status: :created
       else
