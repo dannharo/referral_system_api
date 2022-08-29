@@ -9,4 +9,12 @@ Rails.application.routes.draw do
 
   get 'v1/greetings', to: 'welcome#index'
   post 'v1/greetings/:id', to: 'welcome#create'
+
+  namespace :api do
+    namespace :v1 do
+      resources :users
+      resources :referrals
+      resources :roles, only: [:create, :index]
+    end
+  end
 end
