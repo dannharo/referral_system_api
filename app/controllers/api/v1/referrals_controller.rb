@@ -61,9 +61,34 @@ module Api
       def destroy
     
       end
+      swagger_api :assign_recruiter do
+        summary "Assign recruiter to referral record"
+        notes "This create the association of the referral with the recruiter user"
+        param :path, :id, :integer, :required, "referral id"
+        param :path, :user_id, :integer, :required, "recruiter user id"
+        response :no_content
+        response :not_found, "Record not found"
+        response :bad_request, "Bad Request"
+        response :internal_server_error, "Error while assigning recruiter"
+      end
+      def assign_recruiter
+        return render_invalid_recruiter_error(recruiter) unless recruiter.is_recruiter?
+
+        current_referral.update!(recruiter: recruiter)
+        render json: {}, except: [:created_at, :updated_at], status: :no_content
+      rescue ActiveRecord::RecordNotFound => e
+        Rails.logger.error(e.message)
+        render json: { message: 'Record not found', errors: [e.message] }, status: :not_found
+      rescue StandardError => e
+        Rails.logger.error("Error while assigning recruiter to referral #{e.message}")
+        render json: {
+          'message': 'Error while assigning recruiter',
+          'errors': [e.message]
+        }, status: :internal_server_error
+      end
     
       private
-    
+
       def referral_params
         params.permit([:referred_by, :full_name, :phone_number, :email, :linkedin_url, :cv_url,
                        :tech_stack, :ta_recruiter, :status, :comments, :active])
@@ -78,6 +103,23 @@ module Api
             'errors': [message]
           }, status: :unprocessable_entity
         end
+      end
+
+      def render_invalid_recruiter_error(user)
+        error_message = "The provided User: #{user.id} is not a TA member"
+        Rails.logger.error(error_message)
+        render json: {
+          message: 'Bad Request',
+          errors: [error_message]
+        }, status: :bad_request
+      end
+
+      def current_referral
+        @current_referral ||= Referral.find(params[:id])
+      end
+
+      def recruiter
+        @recruiter ||= User.find(params[:user_id])
       end
     end    
   end
