@@ -1,5 +1,8 @@
+# frozen_string_literal: true
+
 class Referral < ApplicationRecord
-  belongs_to :user, class_name: 'User', foreign_key: 'referred_by'
+  belongs_to :referrer, class_name: 'User', foreign_key: 'referred_by'
+  belongs_to :recruiter, class_name: 'User', foreign_key: 'ta_recruiter', optional: true
 
   validates :linkedin_url,
             uniqueness: {

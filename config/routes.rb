@@ -15,6 +15,7 @@ Rails.application.routes.draw do
       resources :users
       resources :referrals
       resources :roles, only: [:create, :index]
+      patch 'referrals/:id/ta/:user_id', to: 'referrals#assign_recruiter', as: :referral_ta_assign
     end
   end
 end

@@ -1,12 +1,11 @@
-RSpec.describe ' Referrals API', type: :request do
+describe ' Referrals API', type: :request do
   let(:admin_role) { FactoryBot.create(:role, :role_admin) }
   let(:user_role) { FactoryBot.create(:role, :role_user) }
   let(:ta_role) { FactoryBot.create(:role, :role_ta) }
   let(:ta_user) { FactoryBot.create(:user, role_id: ta_role.id) }
   let(:regular_user) { FactoryBot.create(:user, role_id: user_role.id) }
 
-  describe '#Index' do
-
+  describe '#index' do
     before do
       FactoryBot.create(:referral,
         referred_by: regular_user.id,
@@ -41,6 +40,7 @@ RSpec.describe ' Referrals API', type: :request do
       end
     end
   end
+
   describe '#create' do
     context 'When call referral create endpoint with valid data' do
       let(:data_referral) do
@@ -58,6 +58,46 @@ RSpec.describe ' Referrals API', type: :request do
         post '/api/v1/referrals', params: data_referral
 
         expect(response).to have_http_status(:created)
+      end
+    end
+  end
+
+  describe '#assign_recruiter' do
+    let(:valid_referral) do
+      FactoryBot.create(:referral,
+                        referred_by: regular_user.id,
+                        tech_stack: 'ruby, RoR'
+    )
+    end
+    context 'When call referral assign_recruiter endpoint with valid data' do
+      it 'returns an 204 status' do
+        patch "/api/v1/referrals/#{valid_referral.id}/ta/#{ta_user.id}"
+
+        expect(response).to have_http_status(:no_content)
+      end
+    end
+
+    context 'When call referral assign_recruiter endpoint with invalid data' do
+      context 'when the user is not a recruiter' do
+        it 'returns a bad request request' do
+          patch "/api/v1/referrals/#{valid_referral.id}/ta/#{regular_user.id}"
+
+          expect(response).to have_http_status(:bad_request)
+        end
+      end
+      context 'when the referral does not exist' do
+        it 'returns a not found status' do
+          patch "/api/v1/referrals/0/ta/#{ta_user.id}"
+
+          expect(response).to have_http_status(:not_found)
+        end
+      end
+      context 'when the recruiter does not exist' do
+        it 'returns a not found status' do
+          patch "/api/v1/referrals/#{valid_referral.id}/ta/0"
+
+          expect(response).to have_http_status(:not_found)
+        end
       end
     end
   end
