@@ -1,4 +1,4 @@
-describe ' Referrals API', type: :request do
+describe 'Referrals API', type: :request do
   let(:admin_role) { FactoryBot.create(:role, :role_admin) }
   let(:user_role) { FactoryBot.create(:role, :role_user) }
   let(:ta_role) { FactoryBot.create(:role, :role_ta) }
@@ -6,37 +6,56 @@ describe ' Referrals API', type: :request do
   let(:regular_user) { FactoryBot.create(:user, role_id: user_role.id) }
 
   describe '#index' do
-    before do
-      FactoryBot.create(:referral,
-        referred_by: regular_user.id,
-        tech_stack: 'ruby, RoR',
-        ta_recruiter: ta_user.id,
-        signed_date: Time.now
-      )
+    context 'when active referrals exist' do
+      before do
+        FactoryBot.create(:referral,
+          referred_by: regular_user.id,
+          tech_stack: 'ruby, RoR',
+          ta_recruiter: ta_user.id,
+          signed_date: Time.now
+        )
 
-      FactoryBot.create(:referral,
-        referred_by: ta_user.id,
-        linkedin_url: 'https://linkedin.com/example.2',
-        tech_stack: 'ruby, RoR, ',
-        ta_recruiter: ta_user.id,
-        signed_date: Time.now
-      )
+        FactoryBot.create(:referral,
+          referred_by: ta_user.id,
+          linkedin_url: 'https://linkedin.com/example.2',
+          tech_stack: 'ruby, RoR, ',
+          ta_recruiter: ta_user.id,
+          signed_date: Time.now
+        )
 
-      FactoryBot.create(:referral,
-        referred_by: ta_user.id,
-        linkedin_url: 'https://linkedin.com/example.3',
-        tech_stack: 'ruby, RoR, ',
-        ta_recruiter: ta_user.id,
-        signed_date: Time.now,
-        active: false
-      )
-    end
-    context 'When call referral index endpoint' do
+        FactoryBot.create(:referral,
+          referred_by: ta_user.id,
+          linkedin_url: 'https://linkedin.com/example.3',
+          tech_stack: 'ruby, RoR, ',
+          ta_recruiter: ta_user.id,
+          signed_date: Time.now,
+          active: false
+        )
+      end
       it 'returns all the active referrals' do
-        get '/api/v1/referrals'
+        get api_v1_referrals_url
 
         expect(response).to have_http_status(:success)
         expect(JSON.parse(response.body).size).to eq(2)
+      end
+    end
+
+    context 'when there are no active referral' do
+      before do
+        FactoryBot.create(:referral,
+                          referred_by: ta_user.id,
+                          linkedin_url: 'https://linkedin.com/example.3',
+                          tech_stack: 'ruby, RoR, ',
+                          ta_recruiter: ta_user.id,
+                          signed_date: Time.now,
+                          active: false
+        )
+      end
+      it 'returns empty response' do
+        get api_v1_referrals_url
+
+        expect(response).to have_http_status(:success)
+        expect(JSON.parse(response.body).size).to eq(0)
       end
     end
   end
