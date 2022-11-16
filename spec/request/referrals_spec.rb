@@ -61,10 +61,10 @@ describe 'Referrals API', type: :request do
   end
 
   describe '#create' do
-    context 'When call referral create endpoint with valid data' do
+    context 'with valid data' do
       let(:data_referral) do
         {
-          full_name: 'Daniel Haro',
+          full_name: Faker.name,
           referred_by: regular_user.id,
           linkedin_url: 'https://linkedin.com/example.5',
           tech_stack: 'ruby, RoR, ',
@@ -73,10 +73,24 @@ describe 'Referrals API', type: :request do
         }
       end
 
-      it 'create a new referral' do
-        post '/api/v1/referrals', params: data_referral
+      it 'creates a new referral' do
+        expect do
+          post api_v1_referrals_url, params: data_referral
+        end.to change {Referral.count}.by(1)
 
         expect(response).to have_http_status(:created)
+      end
+    end
+
+    context 'with invalid data' do
+      let(:invalid_data_referral) { { full_name: Faker.name } }
+
+      it 'does not create a referral' do
+        expect do
+          post api_v1_referrals_url, params: invalid_data_referral
+        end.to_not change { Referral.count }
+
+        expect(response).to have_http_status(:unprocessable_entity)
       end
     end
   end
