@@ -27,7 +27,7 @@
       "operations": [
         {
           "summary": "Create a Referral",
-          "notes": "This create a new referral",
+          "notes": "This creates a new referral",
           "parameters": [
             {
               "paramType": "form",
@@ -126,6 +126,125 @@
           ],
           "nickname": "Api::V1::Referrals#create",
           "method": "post"
+        }
+      ]
+    },
+    {
+      "path": "/api/v1/referrals/{id}",
+      "operations": [
+        {
+          "summary": "Update a Referral",
+          "notes": "This updates the referral by id",
+          "parameters": [
+            {
+              "paramType": "path",
+              "name": "id",
+              "type": "integer",
+              "description": "referral id",
+              "required": true
+            },
+            {
+              "paramType": "form",
+              "name": "referred_by",
+              "type": "integer",
+              "description": "Refered by user ID",
+              "required": false
+            },
+            {
+              "paramType": "form",
+              "name": "full_name",
+              "type": "string",
+              "description": "Full name of referred used",
+              "required": false
+            },
+            {
+              "paramType": "form",
+              "name": "phone_number",
+              "type": "string",
+              "description": "Phone number of referred used",
+              "required": false
+            },
+            {
+              "paramType": "form",
+              "name": "email",
+              "type": "string",
+              "description": "Email of referred used",
+              "required": false
+            },
+            {
+              "paramType": "form",
+              "name": "linkedin_url",
+              "type": "string",
+              "description": "Linkedin url of referred used",
+              "required": false
+            },
+            {
+              "paramType": "form",
+              "name": "cv_url",
+              "type": "string",
+              "description": "Cv url of referred used",
+              "required": false
+            },
+            {
+              "paramType": "form",
+              "name": "tech_stack",
+              "type": "string",
+              "description": "Tech stack of referred used",
+              "required": false
+            },
+            {
+              "paramType": "form",
+              "name": "ta_recruiter",
+              "type": "integer",
+              "description": "Ta recruiter ID",
+              "required": false
+            },
+            {
+              "paramType": "form",
+              "name": "status",
+              "type": "integer",
+              "description": "Status of referred used",
+              "required": false
+            },
+            {
+              "paramType": "form",
+              "name": "comments",
+              "type": "string",
+              "description": "Comments for referral",
+              "required": false
+            },
+            {
+              "paramType": "form",
+              "name": "active",
+              "type": "boolean",
+              "description": "Referral is active",
+              "required": false
+            }
+          ],
+          "responseMessages": [
+            {
+              "code": 204,
+              "responseModel": null,
+              "message": "No Content"
+            },
+            {
+              "code": 400,
+              "responseModel": null,
+              "message": "Bad Request"
+            },
+            {
+              "code": 404,
+              "responseModel": null,
+              "message": "Record not found"
+            },
+            {
+              "code": 500,
+              "responseModel": null,
+              "message": "Error while assigning recruiter"
+            }
+          ],
+          "nickname": "Api::V1::Referrals#update",
+          "method": "patch"
         }
       ]
     },
