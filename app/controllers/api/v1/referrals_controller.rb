@@ -18,7 +18,7 @@ module Api
     
       swagger_api :create do
         summary "Create a Referral"
-        notes "This create a new referral"
+        notes "This creates a new referral"
         param :form, :referred_by, :integer, :optional, "Refered by user ID"
         param :form, :full_name, :string, :optional, "Full name of referred used"
         param :form, :phone_number, :string, :optional, "Phone number of referred used"
@@ -57,9 +57,43 @@ module Api
       def show
     
       end
-    
+
+      swagger_api :update do
+        summary "Update a Referral"
+        notes "This updates the referral by id"
+        param :path, :id, :integer, :required, "referral id"
+        param :form, :referred_by, :integer, :optional, "Refered by user ID"
+        param :form, :full_name, :string, :optional, "Full name of referred used"
+        param :form, :phone_number, :string, :optional, "Phone number of referred used"
+        param :form, :email, :string, :optional, "Email of referred used"
+        param :form, :linkedin_url, :string, :optional, "Linkedin url of referred used"
+        param :form, :cv_url, :string, :optional, "Cv url of referred used"
+        param :form, :tech_stack, :string, :optional, "Tech stack of referred used"
+        param :form, :ta_recruiter, :integer, :optional, "Ta recruiter ID"
+        param :form, :status, :integer, :optional, "Status of referred used"
+        param :form, :comments, :string, :optional, "Comments for referral"
+        param :form, :active, :boolean, :optional, "Referral is active"
+        response :no_content
+        response :not_found, "Record not found"
+        response :bad_request, "Bad Request"
+        response :internal_server_error, "Error while assigning recruiter"
+      end
       def update
-    
+        current_referral.update!(referral_params)
+
+        render json: {}, status: :no_content
+      rescue ActiveRecord::RecordInvalid => e
+        Rails.logger.error(e.message)
+        render json: { message: 'Bad Request', errors: [e.message] }, status: :bad_request
+      rescue ActiveRecord::RecordNotFound => e
+        Rails.logger.error(e.message)
+        render json: { message: 'Record not found', errors: [e.message] }, status: :not_found
+      rescue StandardError => e
+        Rails.logger.error("Error while updating a referral: #{e.message}")
+        render json: {
+          'message': 'Error while updating record',
+          'errors': [e.message]
+        }, status: :internal_server_error
       end
     
       def destroy
