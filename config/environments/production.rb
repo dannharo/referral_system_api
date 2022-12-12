@@ -33,6 +33,8 @@ Rails.application.configure do
   # Store uploaded files on the local file system (see config/storage.yml for options).
   config.active_storage.service = :local
 
+  config.secret_key_base = '5e47c102ad7ecce39c879c2873f0b18d344847dc85ed3513307ab0e1f224cb7243d5574847e61acf63751b282ac9d12615b9b4920148a548213acc7f119136dc'
+
   # Mount Action Cable outside main process or domain.
   # config.action_cable.mount_path = nil
   # config.action_cable.url = "wss://example.com/cable"

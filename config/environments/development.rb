@@ -17,6 +17,8 @@ Rails.application.configure do
   # Enable server timing
   config.server_timing = true
 
+  config.secret_key_base = '5c4d6e2793c79c5efabf127e6ab96a8231b2124d8c2cf3732211e514bc53ee621b2450a720efafd7c37a79fcaec0e015d5fdb4397634bacd9bff3e8432df7927'
+
   # Enable/disable caching. By default caching is disabled.
   # Run rails dev:cache to toggle caching.
   if Rails.root.join("tmp/caching-dev.txt").exist?
