@@ -11,19 +11,19 @@ default: &default
 
 development:
   <<: *default
-  database: referral_system_api_development
+  database: referral-system-api-development
   username: <%= ENV.fetch('MYSQL_DEV_USERNAME', nil) %>
   password: <%= ENV.fetch('MYSQL_DEV_PASSWORD', nil) %>
   host: <%= ENV.fetch('MYSQL_DEV_HOST', '127.0.0.1') %>
   port: <%= ENV.fetch('MYSQL_DEV_PORT', '3306') %>
 
-test:
-  <<: *default
-  database: referral_system_api_test
-  username: <%= ENV.fetch('MYSQL_TEST_USERNAME', nil) %>
-  password: <%= ENV.fetch('MYSQL_TEST_PASSWORD', nil) %>
-  host: <%= ENV.fetch('MYSQL_TEST_HOST', nil) %>
-  port: <%= ENV.fetch('MYSQL_TEST_PORT', '3306') %>
+#test:
+#  <<: *default
+#  database: referral_system_api_test
+#  username: <%#= ENV.fetch('MYSQL_TEST_USERNAME', nil) %>
+#  password: <%#= ENV.fetch('MYSQL_TEST_PASSWORD', nil) %>
+#  host: <%#= ENV.fetch('MYSQL_TEST_HOST', nil) %>
+#  port: <%#= ENV.fetch('MYSQL_TEST_PORT', '3306') %>
 
 production:
   <<: *default
