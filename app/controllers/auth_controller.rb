@@ -6,7 +6,7 @@ class AuthController < ApplicationController
     def callback
         user = User.find_by(email: user_hash[:email])
         if user.nil?
-            user = User.create(user_hash)
+            user = User.create!(user_hash)
         else
             user.update(user_hash.except(:role_id))
         end
