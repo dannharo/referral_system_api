@@ -4,7 +4,7 @@ class ApplicationController < ActionController::API
   before_action :cors_set_access_control_headers
 
   rescue_from CanCan::AccessDenied do |exception|
-    render json: { message: "Unauthorized" },status: 401
+    render json: { message: "Unauthorized by CanCan" },status: 401
   end
 
   def cors_preflight_check
@@ -26,6 +26,7 @@ class ApplicationController < ActionController::API
 
     payload = JwtAdapter.decode(token)
     @current_user = User.find(payload[:sub])
+    puts @current_user.to_json
   rescue JWT::VerificationError, JWT::DecodeError
     render json: { message: "Unauthorized" }, status: :unauthorized
   rescue ActiveRecord::RecordNotFound
