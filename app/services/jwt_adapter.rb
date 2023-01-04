@@ -25,6 +25,8 @@ class JwtAdapter
     # @param payload [Hash]
     # @return [String] jwt
     def encode(payload)
+      puts 'KEY: '
+      puts KEY
       JWT.encode(payload, KEY, ALGORITHM, { typ: "JWT" })
     end
 
@@ -33,7 +35,13 @@ class JwtAdapter
     def decode(token)
       puts 'TOKEN: '
       puts token
-      JWT.decode(token, KEY, true, { algorithm: ALGORITHM }).first.transform_keys(&:to_sym)
+      puts 'KEY: '
+      puts KEY
+      decoded = JWT.decode(token, KEY, true, { algorithm: ALGORITHM }).first
+      puts 'DECODED: '
+      puts decoded.to_json
+
+      decoded.transform_keys(&:to_sym)
     end
   end
 end
