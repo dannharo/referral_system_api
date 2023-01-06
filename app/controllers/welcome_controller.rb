@@ -35,8 +35,6 @@ class WelcomeController < ApplicationController
   end
 
   def create
-    puts request.params
-    puts request.headers['content-type']
     response = {
       greeting: 'POST action tested successfully'
     }

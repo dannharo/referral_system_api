@@ -7,7 +7,7 @@ class Ability
     return unless user.present?
 
     # Referral abilities
-    can :read, Referral, referrer: user, active: true
+    can :read, Referral, referred_by: user.id, active: true
     can [:create, :update, :assign_recruiter], Referral, referrer: user
 
     # User abilities

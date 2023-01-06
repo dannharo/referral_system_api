@@ -36,7 +36,11 @@ module Api
       end
       def create
         begin
-          referral = Referral.new(referral_params)
+          new_referral = referral_params
+          new_referral[:referred_by] = @current_user.id
+          new_referral[:active] = true
+
+          referral = Referral.new(new_referral)
           if referral.save
             render json: referral, except: [:created_at, :updated_at], status: :created
           else

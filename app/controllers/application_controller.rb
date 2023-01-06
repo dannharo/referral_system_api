@@ -26,7 +26,6 @@ class ApplicationController < ActionController::API
 
     payload = JwtAdapter.decode(token)
     @current_user = User.find(payload[:sub])
-    puts @current_user.to_json
   rescue JWT::VerificationError, JWT::DecodeError
     render json: { message: "Unauthorized" }, status: :unauthorized
   rescue ActiveRecord::RecordNotFound
