@@ -13,6 +13,24 @@ module Api
       end
       def index
         referrals = Referral.accessible_by(current_ability)
+        referrals = referrals.map do |referral|
+          ref = {}
+          ref[:comments] = referral[:comments]
+          ref[:cv_url] = referral[:cv_url]
+          ref[:email] = referral[:email]
+          ref[:full_name] = referral[:full_name]
+          ref[:id] = referral[:id]
+          ref[:linkedin_url] = referral[:linkedin_url]
+          ref[:phone_number] = referral[:phone_number]
+          ref[:referred_by] = referral[:referred_by]
+          ref[:signed_date] = referral[:signed_date]
+          ref[:status] = referral[:status]
+          ref[:ta_recruiter] = referral[:ta_recruiter]
+          ref[:tech_stack] = referral[:tech_stack]
+          ref[:referred_by_name] = referral.referrer.name
+          ref
+        end
+
         render json: referrals, except: [:active, :created_at, :updated_at]
       end
     
@@ -59,7 +77,26 @@ module Api
       end
     
       def show
-    
+        referrals = Referral.accessible_by(current_ability)
+        referrals = referrals.map do |referral|
+          ref = {}
+          ref[:comments] = referral[:comments]
+          ref[:cv_url] = referral[:cv_url]
+          ref[:email] = referral[:email]
+          ref[:full_name] = referral[:full_name]
+          ref[:id] = referral[:id]
+          ref[:linkedin_url] = referral[:linkedin_url]
+          ref[:phone_number] = referral[:phone_number]
+          ref[:referred_by] = referral[:referred_by]
+          ref[:signed_date] = referral[:signed_date]
+          ref[:status] = referral[:status]
+          ref[:ta_recruiter] = referral[:ta_recruiter]
+          ref[:tech_stack] = referral[:tech_stack]
+          ref[:referred_by_name] = referral.referrer.name
+          ref
+        end
+
+        render json: referrals.first, except: [:active, :created_at, :updated_at]
       end
 
       swagger_api :update do
