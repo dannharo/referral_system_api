@@ -11,29 +11,14 @@ module Api
         notes "This lists all the referrals users"
         response :ok
       end
+
       def index
-        referrals = Referral.accessible_by(current_ability)
-        referrals = referrals.map do |referral|
-          ref = {}
-          ref[:comments] = referral[:comments]
-          ref[:cv_url] = referral[:cv_url]
-          ref[:email] = referral[:email]
-          ref[:full_name] = referral[:full_name]
-          ref[:id] = referral[:id]
-          ref[:linkedin_url] = referral[:linkedin_url]
-          ref[:phone_number] = referral[:phone_number]
-          ref[:referred_by] = referral[:referred_by]
-          ref[:signed_date] = referral[:signed_date]
-          ref[:status] = referral[:status]
-          ref[:ta_recruiter] = referral[:ta_recruiter]
-          ref[:tech_stack] = referral[:tech_stack]
-          ref[:referred_by_name] = referral.referrer.name
-          ref
-        end
+        referrals = Referral.accessible_by(current_ability).where(active: true)
+        referrals = referrals.map { |referral| map_referral(referral) }
 
         render json: referrals, except: [:active, :created_at, :updated_at]
       end
-    
+
       swagger_api :create do
         summary "Create a Referral"
         notes "This creates a new referral"
@@ -52,6 +37,7 @@ module Api
         response :unprocessable_entity, "Error while creating a new referral"
         response :internal_server_error, "Error while creating a new record"
       end
+
       def create
         begin
           new_referral = referral_params
@@ -75,28 +61,11 @@ module Api
           }, status: :internal_server_error
         end
       end
-    
-      def show
-        referrals = Referral.accessible_by(current_ability)
-        referrals = referrals.map do |referral|
-          ref = {}
-          ref[:comments] = referral[:comments]
-          ref[:cv_url] = referral[:cv_url]
-          ref[:email] = referral[:email]
-          ref[:full_name] = referral[:full_name]
-          ref[:id] = referral[:id]
-          ref[:linkedin_url] = referral[:linkedin_url]
-          ref[:phone_number] = referral[:phone_number]
-          ref[:referred_by] = referral[:referred_by]
-          ref[:signed_date] = referral[:signed_date]
-          ref[:status] = referral[:status]
-          ref[:ta_recruiter] = referral[:ta_recruiter]
-          ref[:tech_stack] = referral[:tech_stack]
-          ref[:referred_by_name] = referral.referrer.name
-          ref
-        end
 
-        render json: referrals.first, except: [:active, :created_at, :updated_at]
+      def show
+        referral = Referral.find_by(id: params[:id], active: true)
+
+        render json: map_referral(referral), except: [:active, :created_at, :updated_at]
       end
 
       swagger_api :update do
@@ -119,6 +88,7 @@ module Api
         response :bad_request, "Bad Request"
         response :internal_server_error, "Error while assigning recruiter"
       end
+
       def update
         current_referral.update!(referral_params)
 
@@ -136,10 +106,28 @@ module Api
           'errors': [e.message]
         }, status: :internal_server_error
       end
-    
+
       def destroy
-    
+        current_referral.update!(
+          {
+            active: false
+          }
+        )
+        render json: {}, status: :no_content
+      rescue ActiveRecord::RecordInvalid => e
+        Rails.logger.error(e.message)
+        render json: { message: 'Bad Request', errors: [e.message] }, status: :bad_request
+      rescue ActiveRecord::RecordNotFound => e
+        Rails.logger.error(e.message)
+        render json: { message: 'Record not found', errors: [e.message] }, status: :not_found
+      rescue StandardError => e
+        Rails.logger.error("Error while updating a referral: #{e.message}")
+        render json: {
+          'message': 'Error while updating record',
+          'errors': [e.message]
+        }, status: :internal_server_error
       end
+
       swagger_api :assign_recruiter do
         summary "Assign recruiter to referral record"
         notes "This create the association of the referral with the recruiter user"
@@ -150,6 +138,7 @@ module Api
         response :bad_request, "Bad Request"
         response :internal_server_error, "Error while assigning recruiter"
       end
+
       def assign_recruiter
         return render_invalid_recruiter_error(recruiter) unless recruiter.is_recruiter?
 
@@ -165,14 +154,32 @@ module Api
           'errors': [e.message]
         }, status: :internal_server_error
       end
-    
+
       private
+
+      def map_referral(referral)
+        {
+          comments: referral[:comments],
+          cv_url: referral[:cv_url],
+          email: referral[:email],
+          full_name: referral[:full_name],
+          id: referral[:id],
+          linkedin_url: referral[:linkedin_url],
+          phone_number: referral[:phone_number],
+          referred_by: referral[:referred_by],
+          signed_date: referral[:signed_date],
+          status: referral[:status],
+          ta_recruiter: referral[:ta_recruiter].nil? ? 0 : referral[:ta_recruiter],
+          tech_stack: referral[:tech_stack],
+          referred_by_name: referral.referrer.name
+        }
+      end
 
       def referral_params
         params.permit([:referred_by, :full_name, :phone_number, :email, :linkedin_url, :cv_url,
                        :tech_stack, :ta_recruiter, :status, :comments, :active])
       end
-    
+
       def invalid_params_error
         unless params[:id].match? /\A\d+\z/
           message = 'ID is not a numeric value'
@@ -200,6 +207,6 @@ module Api
       def recruiter
         @recruiter ||= User.find(params[:user_id])
       end
-    end    
+    end
   end
 end
