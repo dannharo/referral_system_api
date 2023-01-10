@@ -241,6 +241,24 @@
           "method": "delete"
         }
       ]
+    },
+    {
+      "path": "/api/v1/user/recruiters",
+      "operations": [
+        {
+          "summary": "Fetches all Recruiters",
+          "notes": "This lists all the available recruiters",
+          "responseMessages": [
+            {
+              "code": 200,
+              "responseModel": null,
+              "message": "Ok"
+            }
+          ],
+          "nickname": "Api::V1::Users#recruiters",
+          "method": "get"
+        }
+      ]
     }
   ],
   "authorizations": null

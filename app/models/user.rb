@@ -12,6 +12,8 @@ class User < ApplicationRecord
             uniqueness: { case_sensitive: false },
             length: { minimum: 8, maximum: 254 }
 
+  scope :recruiters, -> { joins(:role).where( role: { name: 'ta' } ) }
+
   def is_recruiter?
     role.name == 'ta'
   end

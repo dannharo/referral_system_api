@@ -18,6 +18,7 @@ Rails.application.routes.draw do
     namespace :v1 do
       resources :users
       get "user/authorize" => "users#authorize"
+      get 'user/recruiters' => 'users#recruiters'
       resources :referrals
       resources :roles, only: [:create, :index]
       patch 'referrals/:id/ta/:user_id', to: 'referrals#assign_recruiter', as: :referral_ta_assign
