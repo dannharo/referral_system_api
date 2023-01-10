@@ -162,6 +162,15 @@ module Api
         end
       end
 
+      swagger_api :recruiters do
+        summary "Fetches all Recruiters"
+        notes "This lists all the available recruiters"
+        response :ok
+      end
+      def recruiters
+        render json: User.recruiters.where(active: true), except: [:active, :created_at, :updated_at]
+      end
+
       private
 
       def user_params
