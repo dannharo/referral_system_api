@@ -7,11 +7,15 @@ class Ability
     return unless user.present?
 
     # Referral abilities
-    can [:read, :recruiters], Referral, referred_by: user.id, active: true
+    can :read, Referral, referred_by: user.id, active: true
+    can :recruiters, User, active: true
     can [:create, :update, :assign_recruiter], Referral, referrer: user
+    can :read, Role, id: user.role_id
 
     # User abilities
     can :manage, User, id: user.id
+
+    can [:read, :assign_recruiter], Referral if user.role_id == 3
 
     return unless user.role_id == 1
 

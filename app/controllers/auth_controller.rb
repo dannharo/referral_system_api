@@ -24,10 +24,10 @@ class AuthController < ApplicationController
     # @return [Hash]
     def user_hash
         {
-          email: auth_hash.dig(:info, :email),
-          name: auth_hash.dig(:info, :name),
-          active: true,
-          role_id: 2
+            email: auth_hash.dig(:info, :email),
+            name: auth_hash.dig(:info, :name),
+            active: true,
+            role_id: 2
         }
     end
 end
