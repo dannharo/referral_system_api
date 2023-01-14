@@ -9,7 +9,7 @@ class Ability
     # Referral abilities
     can :read, Referral, referred_by: user.id, active: true
     can :recruiters, User, active: true
-    can [:create, :update, :assign_recruiter], Referral, referrer: user
+    can [:create, :update], Referral, referrer: user
     can :read, Role, id: user.role_id
 
     # User abilities

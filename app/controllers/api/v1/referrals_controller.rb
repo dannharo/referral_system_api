@@ -90,6 +90,10 @@ module Api
       end
 
       def update
+        if referral_params[:status].present? && @current_user.role_id == 2 
+          return render json: { message: "Unauthorized" },status: 401
+        end
+
         current_referral.update!(referral_params)
 
         render json: {}, status: :no_content
