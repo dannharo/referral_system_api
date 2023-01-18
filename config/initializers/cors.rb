@@ -7,7 +7,7 @@
 
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
-    origins "http://localhost:3000"
+    origins "https://salmon-pebble-0a9cd6f10.2.azurestaticapps.net"
 
     resource "*",
       headers: :any,

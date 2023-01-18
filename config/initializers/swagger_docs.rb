@@ -16,7 +16,7 @@ Swagger::Docs::Config.register_apis({
     # the output location where your .json files are written to
     :api_file_path => "public",
     # the URL base path to your API
-    :base_path => "https://pure-caverns-73223.herokuapp.com/",
+    :base_path => "https://referral-system-api.onrender.com/",
     # :base_path => "http://localhost:3005",
     # if you want to delete all .json files at each generation
     :clean_directory => true,
