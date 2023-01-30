@@ -51,6 +51,7 @@ module Api
                         },
                     ]
                 end
+                Rails.logger.debug("Fetching all permissions")
                 render json: {permissions: permission_list}, status: 200
             end
 
@@ -102,6 +103,7 @@ module Api
                         },
                     ]
                 end
+                Rails.logger.debug("Fetching permission list for user with id #{params[:id]}")
                 render json: {permissions: permission_list}, status: 200
             end
         end
