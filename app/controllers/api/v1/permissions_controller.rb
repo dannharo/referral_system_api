@@ -43,6 +43,10 @@ module Api
                         },
                         {
                             id: 32,
+                            label: "Edit all Referrals"
+                        },
+                        {
+                            id: 33,
                             label: "Assign recruiter"
                         },
                     ]
@@ -90,6 +94,10 @@ module Api
                         },
                         {
                             id: 32,
+                            label: "Edit all Referrals"
+                        },
+                        {
+                            id: 33,
                             label: "Assign recruiter"
                         },
                     ]
