@@ -38,7 +38,7 @@ module Api
         param :form, :email, :string, :required, "User email"
         param :form, :role_id, :integer, :required, "User role id"
         response :created
-        response :unprocessable_entity, "Error while creating a new user"
+        response :unprocessable_entity, "Transaction error while creating a new user"
         response :internal_server_error, "Error while creating a new role"
       end
 
@@ -47,17 +47,20 @@ module Api
 
         user = User.new(user_params)
         unless role_not_allowed
-          if user.save
+          ActiveRecord::Base.transaction do
+            user.save!
             log_debug("Creating user with email #{user.email}")
+
             render json: user, except: %i[active created_at updated_at], status: :created
-          else
-            log_error("Error while creating a new user")
-            render json: {
-              'message': "Error while creating a new user",
-              'errors': user.errors,
-            }, status: :unprocessable_entity
           end
         end
+      rescue ActiveRecord::RecordInvalid => e
+        log_error("Transaction error while creating a new user: #{e.message}")
+
+        render json: {
+          message: "Error while creating a new user: #{e.message}",
+          errors: user.errors
+        }, status: :unprocessable_entity
       rescue StandardError => e
         log_error("Error while creating a new user: #{e.message}")
         render json: {
@@ -116,20 +119,27 @@ module Api
           user = User.find(params[:id])
           user_role_id = user.role_id
 
-          if user.update(user_params)
+          ActiveRecord::Base.transaction do
+            user.update!(user_params)
             Referral.where(ta_recruiter: user.id).update_all(ta_recruiter: nil) if (user_params["role_id"] != 3 && user_role_id == 3)
             log_debug("Updating user with email #{user.email}")
+
             render json: user, except: %i[active created_at updated_at], status: :ok
-          else
-            log_error("Error updating user with id #{params[:id]}")
-            render json: user.errors, status: :unprocessable_entity
           end
         end
       rescue ActiveRecord::RecordNotFound => e
+        log_error("Error, RecordNotFound: #{e.message}")
+
         render json: {
           'message': "Record not found",
           'errors': [e.message],
         }, status: :not_found
+      rescue ActiveRecord::RecordInvalid => e
+        message = "Transaction error while retrieving user #{e.message}"
+        log_error(message)
+
+        render json: { message: message, errors: [user.errors] },
+               status: :unprocessable_entity
       rescue StandardError => e
         log_error("Error while retrieving user #{e.message}")
         render json: {
@@ -152,36 +162,41 @@ module Api
         unless invalid_params_error
           user = User.find(params[:id])
 
-          if user.update(active: false)
+          ActiveRecord::Base.transaction do
+            user.update!(active: false)
             Referral.where(ta_recruiter: user.id).update_all(ta_recruiter: nil) if (user.role_id == 3)
             log_debug("Deleting user with email #{user.email}")
+
             render json: {
-              'message': "User successfully deleted.",
+              'message': 'User successfully deleted.'
             }, status: :ok
-          else
-            log_error("Error while deleting user with id #{params[:id]}")
-            render json: user.errors, status: :unprocessable_entity
           end
         end
       rescue ActiveRecord::RecordNotFound => e
+        log_error("Error, RecordNotFound: #{e.message}")
+
         render json: {
           'message': "Record not found",
           'errors': [e.message],
         }, status: :not_found
+      rescue ActiveRecord::RecordInvalid => e
+        message = "Transaction error while deleting user: #{e.message}"
+        log_error(message)
+
+        render json: { message: message, errors: [user.errors] }, status: :unprocessable_entity
       rescue StandardError => e
         log_error("Error while deleting user: #{e.message}")
         render json: {
-          'message': "Error while deleting user",
-          'errors': [e.message],
+          'message': 'Error while deleting user',
+          'errors': [e.message]
         }, status: :internal_server_error
       end
 
       swagger_api :recruiters do
-        summary "Fetches all Recruiters"
-        notes "This lists all the available recruiters"
+        summary 'Fetches all Recruiters'
+        notes 'This lists all the available recruiters'
         response :ok
       end
-
       def recruiters
         render json: User.recruiters.where(active: true), except: %i[active created_at updated_at]
       end
