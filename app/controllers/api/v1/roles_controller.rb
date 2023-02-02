@@ -22,7 +22,7 @@ module Api
         notes "This create a new role"
         param :form, :name, :string, :required, "Role name"
         response :created
-        response :unprocessable_entity, "Parameter missing"
+        response :unprocessable_entity, "Transaction error while creating new role"
         response :internal_server_error, "Error while creating a new role"
       end
 
@@ -30,13 +30,16 @@ module Api
         # TODO: Implement validation to ensure only admin users can add new roles
         begin
           role = Role.new(role_params)
-          if role.save
+          ActiveRecord::Base.transaction do
+            role.save!
             log_debug("Creating role with name #{role.name}")
+
             render json: role, status: :created
-          else
-            log_error("Error while creating a new role")
-            render json: role.errors, status: :unprocessable_entity
           end
+        rescue ActiveRecord::RecordInvalid => e
+          log_error("Transaction error while creating new role: #{e.message}")
+
+          render json: role.errors, status: :unprocessable_entity
         rescue ActionController::ParameterMissing => e
           log_error("Error while creating new role: #{e.message}")
           render json: {

@@ -10,7 +10,7 @@ Role.create!([
   },
   {
     id: 3,
-    name: 'ta'
+    name: 'TA'
   }
 ])
 

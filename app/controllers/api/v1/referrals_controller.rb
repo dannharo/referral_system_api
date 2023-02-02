@@ -35,7 +35,7 @@ module Api
         param :form, :comments, :string, :optional, "Comments for referral"
         param :form, :active, :boolean, :optional, "Referral is active"
         response :created
-        response :unprocessable_entity, "Error while creating a new referral"
+        response :unprocessable_entity, "Error, the transaction has failed"
         response :internal_server_error, "Error while creating a new record"
       end
 
@@ -47,22 +47,22 @@ module Api
           new_referral[:active] = true
 
           referral = Referral.new(new_referral)
-          if referral.save
+          ActiveRecord::Base.transaction do
+            referral.save!
             log_debug("Creating referral with email #{referral.email}")
+
             render json: referral, except: [:created_at, :updated_at], status: :created
-          else
-            log_error("Error while creating a new referral")
-            render json: {
-              'message': "Error while creating a new referral",
-              'errors': referral.errors,
-            }, status: :unprocessable_entity
           end
+        rescue ActiveRecord::RecordInvalid => e
+          message = "Error, the transaction has failed, reason: #{e.message}"
+          log_error(message)
+
+          render json: { message: message, errors: referral.errors }, status: :unprocessable_entity
         rescue StandardError => e
-          log_error("Error while creating a new referral: #{e.message}")
-          render json: {
-            'message': "Error while creating a new record",
-            'errors': [e.message],
-          }, status: :internal_server_error
+          message = "Error while creating a new referral: #{e.message}"
+          log_error(message)
+
+          render json: { message: message, errors: referral.errors }, status: :internal_server_error
         end
       end
 
@@ -97,12 +97,15 @@ module Api
       def update
         if referral_params[:status].present? && @current_user.role_id == 2
           log_error("Error updating referral with id #{referral_params[:id]}")
-          return render json: { message: "Unauthorized" },status: 401
+
+          return render json: { message: "Unauthorized" }, status: 401
         end
 
-        current_referral.update!(referral_params)
+        ActiveRecord::Base.transaction do
+          current_referral.update!(referral_params)
+          log_debug("Updating referral with id #{referral_params[:id]}")
+        end
 
-        log_debug("Updating referral with id #{referral_params[:id]}")
         render json: {}, status: :no_content
       rescue ActiveRecord::RecordInvalid => e
         log_error(e.message)
@@ -119,11 +122,13 @@ module Api
       end
 
       def destroy
-        current_referral.update!(
-          {
-            active: false,
-          }
-        )
+        ActiveRecord::Base.transaction do
+          current_referral.update!(
+            {
+              active: false
+            }
+          )
+        end
         log_debug("Deleting referral with email #{current_referral.email}")
         render json: {}, status: :no_content
       rescue ActiveRecord::RecordInvalid => e
@@ -153,9 +158,11 @@ module Api
 
       def assign_recruiter
         return render_invalid_recruiter_error(recruiter) unless recruiter.is_recruiter?
-
-        current_referral.update!(recruiter: recruiter)
+        ActiveRecord::Base.transaction do
+          current_referral.update!(recruiter: recruiter)
+        end
         log_debug("Assign recruiter to referral with email #{current_referral.email}")
+
         render json: {}, except: [:created_at, :updated_at], status: :no_content
       rescue ActiveRecord::RecordNotFound => e
         log_error(e.message)
