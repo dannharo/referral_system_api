@@ -68,9 +68,16 @@ module Api
 
       def show
         referral = Referral.find_by(id: params[:id], active: true)
-        log_debug("Fetching referral with email #{referral.email}")
 
-        render json: map_referral(referral), except: [:active, :created_at, :updated_at]
+        unless referral
+          log_error('Error, record not found')
+
+          render json: { message: 'Record not found', errors: 'Record not found' }, status: :not_found
+        else
+          log_debug("Fetching referral with email #{referral.email}")
+
+          render json: map_referral(referral), except: [:active, :created_at, :updated_at]
+        end
       end
 
       swagger_api :update do
