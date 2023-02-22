@@ -11,6 +11,7 @@ module Api
         notes "This lists all the available roles"
         response :ok
       end
+
       def index
         Rails.logger.debug("Fetching all Roles")
         render json: Role.accessible_by(current_ability)
@@ -24,6 +25,7 @@ module Api
         response :unprocessable_entity, "Parameter missing"
         response :internal_server_error, "Error while creating a new role"
       end
+
       def create
         # TODO: Implement validation to ensure only admin users can add new roles
         begin
@@ -38,31 +40,31 @@ module Api
         rescue ActionController::ParameterMissing => e
           Rails.logger.error("Error while creating new role: #{e.message}")
           render json: {
-            'message': 'Parameter missing',
-            'errors': e.message
+            'message': "Parameter missing",
+            'errors': e.message,
           }, status: :unprocessable_entity
         rescue StandardError => e
           Rails.logger.error("Error while creating new role: #{e.message}")
           render json: {
-            'message': 'Error while creating a new role',
-            'errors': e.message
+            'message': "Error while creating a new role",
+            'errors': e.message,
           }, status: :internal_server_error
         end
       end
 
       private
-    
+
       def raise_error(message)
         Rails.logger.error(message)
         render json: {
-          'message': message
+          'message': message,
         }, status: :unprocessable_entity
       end
-      
+
       def role_params
         params.require(:name)
         params.permit(:name)
       end
-    end    
+    end
   end
 end
