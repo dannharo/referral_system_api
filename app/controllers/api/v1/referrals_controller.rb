@@ -15,7 +15,7 @@ module Api
       def index
         referrals = Referral.accessible_by(current_ability).where(active: true)
         referrals = referrals.map { |referral| map_referral(referral) }
-        
+
         Rails.logger.debug("Fetching all Referrals")
         render json: referrals, except: [:active, :created_at, :updated_at]
       end
@@ -42,6 +42,7 @@ module Api
       def create
         begin
           new_referral = referral_params
+          new_referral[:linkedin_url] = referral_params[:linkedin_url].delete(' ')
           new_referral[:referred_by] = @current_user.id
           new_referral[:active] = true
 
@@ -52,15 +53,15 @@ module Api
           else
             Rails.logger.error("Error while creating a new referral")
             render json: {
-              'message': 'Error while creating a new referral',
-              'errors': referral.errors
+              'message': "Error while creating a new referral",
+              'errors': referral.errors,
             }, status: :unprocessable_entity
           end
         rescue StandardError => e
           Rails.logger.error("Error while creating a new referral: #{e.message}")
           render json: {
-            'message': 'Error while creating a new record',
-            'errors': [e.message]
+            'message': "Error while creating a new record",
+            'errors': [e.message],
           }, status: :internal_server_error
         end
       end
@@ -96,7 +97,7 @@ module Api
       def update
         if referral_params[:status].present? && @current_user.role_id == 2
           Rails.logger.error("Error updating referral with id #{referral_params[:id]}")
-          return render json: { message: "Unauthorized" },status: 401
+          return render json: { message: "Unauthorized" }, status: 401
         end
 
         current_referral.update!(referral_params)
@@ -105,37 +106,37 @@ module Api
         render json: {}, status: :no_content
       rescue ActiveRecord::RecordInvalid => e
         Rails.logger.error(e.message)
-        render json: { message: 'Bad Request', errors: [e.message] }, status: :bad_request
+        render json: { message: "Bad Request", errors: [e.message] }, status: :bad_request
       rescue ActiveRecord::RecordNotFound => e
         Rails.logger.error(e.message)
-        render json: { message: 'Record not found', errors: [e.message] }, status: :not_found
+        render json: { message: "Record not found", errors: [e.message] }, status: :not_found
       rescue StandardError => e
         Rails.logger.error("Error while updating a referral: #{e.message}")
         render json: {
-          'message': 'Error while updating record',
-          'errors': [e.message]
+          'message': "Error while updating record",
+          'errors': [e.message],
         }, status: :internal_server_error
       end
 
       def destroy
         current_referral.update!(
           {
-            active: false
+            active: false,
           }
         )
         Rails.logger.debug("Deleting referral with email #{current_referral.email}")
         render json: {}, status: :no_content
       rescue ActiveRecord::RecordInvalid => e
         Rails.logger.error(e.message)
-        render json: { message: 'Bad Request', errors: [e.message] }, status: :bad_request
+        render json: { message: "Bad Request", errors: [e.message] }, status: :bad_request
       rescue ActiveRecord::RecordNotFound => e
         Rails.logger.error(e.message)
-        render json: { message: 'Record not found', errors: [e.message] }, status: :not_found
+        render json: { message: "Record not found", errors: [e.message] }, status: :not_found
       rescue StandardError => e
         Rails.logger.error("Error while updating a referral: #{e.message}")
         render json: {
-          'message': 'Error while updating record',
-          'errors': [e.message]
+          'message': "Error while updating record",
+          'errors': [e.message],
         }, status: :internal_server_error
       end
 
@@ -158,12 +159,12 @@ module Api
         render json: {}, except: [:created_at, :updated_at], status: :no_content
       rescue ActiveRecord::RecordNotFound => e
         Rails.logger.error(e.message)
-        render json: { message: 'Record not found', errors: [e.message] }, status: :not_found
+        render json: { message: "Record not found", errors: [e.message] }, status: :not_found
       rescue StandardError => e
         Rails.logger.error("Error while assigning recruiter to referral #{e.message}")
         render json: {
-          'message': 'Error while assigning recruiter',
-          'errors': [e.message]
+          'message': "Error while assigning recruiter",
+          'errors': [e.message],
         }, status: :internal_server_error
       end
 
@@ -183,7 +184,7 @@ module Api
           status: referral[:status],
           ta_recruiter: referral[:ta_recruiter].nil? ? 0 : referral[:ta_recruiter],
           tech_stack: referral[:tech_stack],
-          referred_by_name: referral.referrer.name
+          referred_by_name: referral.referrer.name,
         }
       end
 
@@ -194,11 +195,11 @@ module Api
 
       def invalid_params_error
         unless params[:id].match? /\A\d+\z/
-          message = 'ID is not a numeric value'
+          message = "ID is not a numeric value"
           Rails.logger.error(message)
           render json: {
-            'message': 'Invalid parameter',
-            'errors': [message]
+            'message': "Invalid parameter",
+            'errors': [message],
           }, status: :unprocessable_entity
         end
       end
@@ -207,8 +208,8 @@ module Api
         error_message = "The provided User: #{user.id} is not a TA member"
         Rails.logger.error(error_message)
         render json: {
-          message: 'Bad Request',
-          errors: [error_message]
+          message: "Bad Request",
+          errors: [error_message],
         }, status: :bad_request
       end
 
