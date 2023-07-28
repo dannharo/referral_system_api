@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_06_29_192536) do
+ActiveRecord::Schema[7.0].define(version: 2023_07_20_220907) do
   create_table "logs", charset: "utf8mb3", force: :cascade do |t|
     t.string "view"
     t.string "action"
@@ -19,6 +19,37 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_29_192536) do
     t.json "request_payload"
     t.string "message"
     t.boolean "has_error"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "referral_comments", charset: "utf8mb3", force: :cascade do |t|
+    t.bigint "referral_id", null: false
+    t.bigint "referral_status_id", null: false
+    t.bigint "created_by_id"
+    t.text "comment"
+    t.string "created_by_name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_id"], name: "index_referral_comments_on_created_by_id"
+    t.index ["referral_id"], name: "index_referral_comments_on_referral_id"
+    t.index ["referral_status_id"], name: "index_referral_comments_on_referral_status_id"
+  end
+
+  create_table "referral_status_histories", charset: "utf8mb3", force: :cascade do |t|
+    t.bigint "referral_id", null: false
+    t.bigint "referral_status_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["referral_id"], name: "index_referral_status_histories_on_referral_id"
+    t.index ["referral_status_id"], name: "index_referral_status_histories_on_referral_status_id"
+    t.index ["user_id"], name: "index_referral_status_histories_on_user_id"
+  end
+
+  create_table "referral_statuses", charset: "utf8mb3", force: :cascade do |t|
+    t.string "status"
+    t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -41,7 +72,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_29_192536) do
     t.string "cv_url"
     t.text "tech_stack"
     t.integer "ta_recruiter"
-    t.integer "status"
+    t.integer "referral_status_id"
     t.text "comments"
     t.date "signed_date"
     t.boolean "active"
@@ -64,4 +95,10 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_29_192536) do
     t.datetime "updated_at", null: false
   end
 
+  add_foreign_key "referral_comments", "referral_statuses"
+  add_foreign_key "referral_comments", "referrals"
+  add_foreign_key "referral_comments", "users", column: "created_by_id"
+  add_foreign_key "referral_status_histories", "referral_statuses"
+  add_foreign_key "referral_status_histories", "referrals"
+  add_foreign_key "referral_status_histories", "users"
 end

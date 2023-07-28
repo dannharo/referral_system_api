@@ -19,7 +19,9 @@ Rails.application.routes.draw do
       resources :users
       get "user/authorize" => "users#authorize"
       get 'user/recruiters' => 'users#recruiters'
-      resources :referrals
+      resources :referrals do
+        resources :referral_comments, only: [:index, :create]
+      end
       resources :roles, only: [:create, :index]
       patch 'referral/:id/ta/:user_id', to: 'referrals#assign_recruiter', as: :referral_ta_assign
       get 'referral/:id/cv', to: 'referrals#download_cv'

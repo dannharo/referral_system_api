@@ -23,7 +23,7 @@ class ApplicationController < ActionController::API
   # Extract access-token from headers and sets :current_user reader
   # @return [void]
   def authenticate_user!
-    token = request.authorization.split(' ').last
+    token = request.authorization&.split(' ')&.last
     log_error("Token is missing, request was unauthorized")
     return render(json: { message: "Token is missing" }, status: :unauthorized) if token.nil?
 
