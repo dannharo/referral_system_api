@@ -39,7 +39,7 @@ Referral.destroy_all
      tech_stack: "ruby, RoR",
      ta_recruiter: rand(1..10),
      active: true,
-     status: 1,
+     referral_status_id: 1,
      signed_date: Faker::Date.between(from: Time.now-20, to: Time.now),
      comments: "Referral comments"
    }

@@ -31,7 +31,7 @@ module Api
         param :form, :cv_url, :string, :optional, "Cv url of referred used"
         param :form, :tech_stack, :string, :optional, "Tech stack of referred used"
         param :form, :ta_recruiter, :integer, :optional, "Ta recruiter ID"
-        param :form, :status, :integer, :optional, "Status of referred used"
+        param :form, :referral_status_id, :integer, :optional, "Status of referred used"
         param :form, :comments, :string, :optional, "Comments for referral"
         param :form, :active, :boolean, :optional, "Referral is active"
         response :created
@@ -105,7 +105,7 @@ module Api
         param :form, :cv_url, :string, :optional, "Cv url of referred used"
         param :form, :tech_stack, :string, :optional, "Tech stack of referred used"
         param :form, :ta_recruiter, :integer, :optional, "Ta recruiter ID"
-        param :form, :status, :integer, :optional, "Status of referred used"
+        param :form, :referral_status_id, :integer, :optional, "Status of referred used"
         param :form, :comments, :string, :optional, "Comments for referral"
         param :form, :active, :boolean, :optional, "Referral is active"
         response :no_content
@@ -267,7 +267,7 @@ module Api
 
       def referral_params
         params.permit([:referred_by, :full_name, :phone_number, :email, :linkedin_url,
-                       :tech_stack, :ta_recruiter, :status, :comments, :active])
+                       :tech_stack, :ta_recruiter, :referral_status_id, :comments, :active])
       end
 
       def invalid_params_error

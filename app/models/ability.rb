@@ -10,6 +10,7 @@ class Ability
     can :read, Referral, referred_by: user.id, active: true
     can :recruiters, User, active: true
     can [:create, :update], Referral, referrer: user
+    can [:index, :create], ReferralComment
     can :read, Role, id: user.role_id
 
     # User abilities
@@ -20,6 +21,6 @@ class Ability
     return unless user.role_id == 1
 
     # Admin abilities
-    can :manage, [Referral, Role, User]
+    can :manage, [Referral, Role, User, ReferralComment]
   end
 end
