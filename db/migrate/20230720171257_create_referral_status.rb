@@ -6,5 +6,10 @@ class CreateReferralStatus < ActiveRecord::Migration[7.0]
 
       t.timestamps
     end
+    statuses = %w[Recruitment Interviewing Managers Client Offer Hiring Failed]
+
+    statuses.each_with_index do |status, index|
+      ReferralStatus.create(id: index + 1, status: status)
+    end
   end
 end

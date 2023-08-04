@@ -28,7 +28,6 @@ module Api
         param :form, :phone_number, :string, :optional, "Phone number of referred used"
         param :form, :email, :string, :optional, "Email of referred used"
         param :form, :linkedin_url, :string, :optional, "Linkedin url of referred used"
-        param :form, :cv_url, :string, :optional, "Cv url of referred used"
         param :form, :tech_stack, :string, :optional, "Tech stack of referred used"
         param :form, :ta_recruiter, :integer, :optional, "Ta recruiter ID"
         param :form, :referral_status_id, :integer, :optional, "Status of referred used"
@@ -62,6 +61,7 @@ module Api
           referral = Referral.new(new_referral)
           ActiveRecord::Base.transaction do
             referral.save!
+            referral.referral_status_histories.new(referral_status_history_params(referral.referral_status_id)).save!
             log_debug("Creating referral with email #{referral.email}")
 
             render json: referral, except: [:created_at, :updated_at], status: :created
@@ -115,7 +115,7 @@ module Api
       end
 
       def update
-        if referral_params[:status].present? && @current_user.role_id == 2
+        if referral_params[:referral_status_id].present? && @current_user.role_id == 2
           log_error("Error updating referral with id #{referral_params[:id]}")
 
           return render json: { message: "Unauthorized" }, status: 401
@@ -135,7 +135,13 @@ module Api
         end        
 
         ActiveRecord::Base.transaction do
+          previous_status = current_referral.referral_status_id
           current_referral.update!(referral_params)
+
+          if previous_status != referral_params[:referral_status_id]
+            current_referral.referral_status_histories.new(referral_status_history_params(referral_params[:referral_status_id])).save!
+          end
+
           log_debug("Updating referral with id #{referral_params[:id]}")
         end
 
@@ -258,7 +264,7 @@ module Api
           phone_number: referral[:phone_number],
           referred_by: referral[:referred_by],
           signed_date: referral[:signed_date],
-          status: referral[:status],
+          status: referral[:referral_status_id],
           ta_recruiter: referral[:ta_recruiter].nil? ? 0 : referral[:ta_recruiter],
           tech_stack: referral[:tech_stack],
           referred_by_name: referral.referrer.name,
@@ -296,6 +302,13 @@ module Api
 
       def recruiter
         @recruiter ||= User.find(params[:user_id])
+      end
+
+      def referral_status_history_params(status)
+        {
+          referral_status_id: status,
+          user_id: current_user.id
+        }
       end
     end
   end

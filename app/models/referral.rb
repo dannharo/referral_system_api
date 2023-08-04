@@ -4,6 +4,7 @@ class Referral < ApplicationRecord
   belongs_to :referrer, class_name: 'User', foreign_key: 'referred_by'
   belongs_to :recruiter, class_name: 'User', foreign_key: 'ta_recruiter', optional: true
   has_many :referral_comments
+  has_many :referral_status_histories
 
   validates :linkedin_url,
             uniqueness: {
