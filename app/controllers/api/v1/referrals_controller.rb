@@ -143,9 +143,10 @@ module Api
 
         ActiveRecord::Base.transaction do
           previous_status = current_referral.referral_status_id
-          current_referral.update!(referral_params)
+          current_referral.update!(referral_params.except(:referral_comment))
 
-          if previous_status != referral_params[:referral_status_id]
+          if referral_params[:referral_status_id] && previous_status != referral_params[:referral_status_id]
+            create_referral_comment!(referral_params[:referral_status_id], referral_params[:referral_comment]) if referral_params[:referral_comment]
             current_referral.referral_status_histories.new(referral_status_history_params(referral_params[:referral_status_id])).save!
           end
 
@@ -328,7 +329,7 @@ module Api
 
       def referral_params
         params.permit([:referred_by, :full_name, :phone_number, :email, :linkedin_url,
-                       :tech_stack, :ta_recruiter, :referral_status_id, :comments, :active])
+                       :tech_stack, :ta_recruiter, :referral_status_id, :comments, :active, :referral_comment])
       end
 
       def invalid_params_error
@@ -363,6 +364,22 @@ module Api
         {
           referral_status_id: status,
           user_id: current_user.id
+        }
+      end
+
+      def create_referral_comment!(referral_status, referral_comment)
+        new_comment_params = new_comment(referral_status, referral_comment)
+        comment =  current_referral.referral_comments.new(new_comment_params)
+
+        comment.save!
+      end
+
+      def new_comment(referral_status, referral_comment)
+        {
+          referral_status_id: referral_status,
+          comment: referral_comment,
+          created_by_id: current_user.id,
+          created_by_name: current_user&.name
         }
       end
     end
