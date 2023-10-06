@@ -2,7 +2,8 @@ module Api
   module V1
     class ReferralCommentsController < ApplicationController
       before_action :authenticate_user!
-      load_and_authorize_resource
+      load_and_authorize_resource :referral
+      load_and_authorize_resource :referral_comment, through: :referral
 
       swagger_controller :referral_comments, "Referral Comments Management Endpoint"
 
@@ -17,16 +18,10 @@ module Api
 
       def index
         comments = current_referral.referral_comments
-        if comments.present?
-          log_debug("Fetching referral comments with email #{current_referral.email}")
-          mapped_comments = comments.map { |comment| map_comment(comment) }
+        log_debug("Fetching referral comments with email #{current_referral.email}")
+        mapped_comments = comments.map { |comment| map_comment(comment) }
 
-          render json: mapped_comments
-        else
-          log_debug("Referral comments not found for referral #{current_referral.id}")
-
-          render json: { message: 'Record not found', errors: "Comments not found for referral id = #{params[:referral_id]}" }, status: :not_found
-        end
+        render json: mapped_comments
       rescue ActiveRecord::RecordNotFound => e
         log_error("Error, referral id = #{params[:referral_id]} record not found")
 
@@ -47,7 +42,7 @@ module Api
       end
 
       def create
-        new_comment_params = new_comment(comment_params)
+        new_comment_params = new_comment(referral_comment_params)
         comment =  current_referral.referral_comments.new(new_comment_params)
         ActiveRecord::Base.transaction do
           comment.save!
@@ -66,8 +61,8 @@ module Api
         @current_referral ||= Referral.find(params[:referral_id])
       end
 
-      def comment_params
-        params.permit(%i[comment created_by_id referral_status_id])
+      def referral_comment_params
+        params.require(:referral_comment).permit(%i[referral_status_id comment])
       end
 
       def map_comment(comment)

@@ -10,7 +10,7 @@ class Ability
     can :read, Referral, referred_by: user.id, active: true
     can :recruiters, User, active: true
     can [:create, :update], Referral, referrer: user
-    can [:index, :create], ReferralComment
+    can [:index, :create], ReferralComment, author: user
     can :read, Role, id: user.role_id
 
     # User abilities
