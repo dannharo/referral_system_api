@@ -40,7 +40,7 @@ gem "bootsnap", require: false
 gem "rack-cors"
 
 gem "swagger-docs"
-gem "faker", :git => "https://github.com/faker-ruby/faker.git", :branch => "master"
+gem 'faker', '~> 1.6', '>= 1.6.6'
 
 # JWT
 gem "jwt"
