@@ -14,7 +14,7 @@ class AuthController < ApplicationController
         end
         app_token = create_app_token(user.id, { exp: 24.hours.from_now.to_i })
         # redirect_url = request.env['omniauth.params']['redirect_url'] || "/"
-        redirect_url = 'https://salmon-pebble-0a9cd6f10.2.azurestaticapps.net/'
+        redirect_url = 'https://referralmdc.azurewebsites.net/'
         redirect_to "#{redirect_url}?token=#{app_token}", allow_other_host: true
     end
 

@@ -7,7 +7,7 @@
 
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
-    origins "https://salmon-pebble-0a9cd6f10.2.azurestaticapps.net"
+    origins "https://referralmdc.azurewebsites.net/"
 
     resource "*",
       headers: :any,
