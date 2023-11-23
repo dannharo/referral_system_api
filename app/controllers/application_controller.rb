@@ -6,13 +6,13 @@ class ApplicationController < ActionController::API
 
   rescue_from CanCan::AccessDenied do |exception|
     log_error("User has not the correct permissions, request was unauthorized")
-    render json: { message: "Unauthorized by CanCan" },status: 401
+    render json: { message: "Unauthorized by CanCan" }, status: 401
   end
 
   def cors_preflight_check
-    if request.method == 'OPTIONS'
+    if request.method == "OPTIONS"
       cors_set_access_control_headers
-      render text: '', content_type: 'text/plain'
+      render text: "", content_type: "text/plain"
     end
   end
 
@@ -23,7 +23,7 @@ class ApplicationController < ActionController::API
   # Extract access-token from headers and sets :current_user reader
   # @return [void]
   def authenticate_user!
-    token = request.authorization&.split(' ')&.last
+    token = request.authorization&.split(" ")&.last
     log_error("Token is missing, request was unauthorized")
     return render(json: { message: "Token is missing" }, status: :unauthorized) if token.nil?
 
@@ -41,9 +41,9 @@ class ApplicationController < ActionController::API
   end
 
   def cors_set_access_control_headers
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    response.headers['Access-Control-Allow-Methods'] = 'POST, GET, PUT, PATCH, DELETE, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = 'Origin, Content-Type, Accept, Authorization, Token, Auth-Token, Email, X-User-Token, X-User-Email'
-    response.headers['Access-Control-Max-Age'] = '1728000'
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "POST, GET, PUT, PATCH, DELETE, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Origin, Content-Type, Accept, Authorization, Token, Auth-Token, Email, X-User-Token, X-User-Email"
+    response.headers["Access-Control-Max-Age"] = "1728000"
   end
 end
